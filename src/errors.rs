@@ -7,4 +7,7 @@ pub enum Errors {
 
     #[error("Shader cannot be compiled")]
     ShaderCompileError(String),
+
+    #[error("File not found")]
+    FileNotFound(String),
 }

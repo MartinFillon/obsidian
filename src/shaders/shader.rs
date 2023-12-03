@@ -1,10 +1,15 @@
 use crate::errors::Errors;
 use gl::types::GLuint;
+use std::fs;
 
 #[derive(Clone, Copy)]
 pub enum ShaderType {
     VertexShader,
-    Fragment,
+    FragmentShader,
+    GeometryShader,
+    ComputeShader,
+    TessControlShader,
+    TessEvaluationShader,
 }
 
 pub struct Shader {
@@ -17,15 +22,23 @@ impl From<ShaderType> for u32 {
     fn from(r#type: ShaderType) -> Self {
         match r#type {
             ShaderType::VertexShader => gl::VERTEX_SHADER,
-            ShaderType::Fragment => gl::FRAGMENT_SHADER,
+            ShaderType::FragmentShader => gl::FRAGMENT_SHADER,
+            ShaderType::GeometryShader => gl::GEOMETRY_SHADER,
+            ShaderType::ComputeShader => gl::COMPUTE_SHADER,
+            ShaderType::TessControlShader => gl::TESS_CONTROL_SHADER,
+            ShaderType::TessEvaluationShader => gl::TESS_EVALUATION_SHADER,
         }
     }
 }
 
 impl Shader {
-    pub fn new(r#type: ShaderType, source: String) -> Self {
+    pub fn new(r#type: ShaderType, file: &str) -> Result<Self, Errors> {
         let id = unsafe { gl::CreateShader(r#type.clone().into()) };
-        Shader { id, r#type, source }
+        let source = match fs::read_to_string(file) {
+            Ok(s) => s,
+            Err(_) => return Err(Errors::FileNotFound(file.to_string())),
+        };
+        Ok(Shader { id, r#type, source })
     }
 
     pub fn get_id(&self) -> GLuint {
