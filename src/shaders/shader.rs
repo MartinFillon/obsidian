@@ -1,6 +1,5 @@
 use crate::errors::Errors;
 use gl::types::GLuint;
-use std::fs;
 
 #[derive(Clone, Copy)]
 pub enum ShaderType {
@@ -34,11 +33,11 @@ impl From<ShaderType> for u32 {
 impl Shader {
     pub fn new(r#type: ShaderType, file: &str) -> Result<Self, Errors> {
         let id = unsafe { gl::CreateShader(r#type.clone().into()) };
-        let source = match fs::read_to_string(file) {
-            Ok(s) => s,
-            Err(_) => return Err(Errors::FileNotFound(file.to_string())),
-        };
-        Ok(Shader { id, r#type, source })
+        Ok(Shader {
+            id,
+            r#type,
+            source: String::from(file),
+        })
     }
 
     pub fn get_id(&self) -> GLuint {
@@ -70,8 +69,8 @@ impl Shader {
             let mut v: Vec<u8> = Vec::with_capacity(1024);
             unsafe {
                 gl::GetShaderInfoLog(self.id, 1024, &mut log_len, v.as_mut_ptr().cast());
-                v.set_len(log_len.try_into().unwrap());
             }
+            v.resize(log_len.try_into().unwrap(), 0);
             Err(Errors::ShaderCompileError(String::from_utf8(v).unwrap()))
         } else {
             Ok(())
@@ -81,23 +80,18 @@ impl Shader {
 
 pub struct ShaderProgram {
     id: GLuint,
-    shaders: Vec<Shader>,
 }
 
 impl ShaderProgram {
     pub fn new() -> Self {
         let id = unsafe { gl::CreateProgram() };
-        Self {
-            id,
-            shaders: Vec::new(),
-        }
+        Self { id }
     }
 
-    pub fn attach_shader(&mut self, shader: Shader) {
+    pub fn attach_shader(&mut self, shader: &Shader) {
         unsafe {
             gl::AttachShader(self.id, shader.id);
         }
-        self.shaders.push(shader);
     }
 
     pub fn link(&self) -> Result<(), Errors> {
@@ -111,11 +105,19 @@ impl ShaderProgram {
             let mut v: Vec<u8> = Vec::with_capacity(1024);
             unsafe {
                 gl::GetProgramInfoLog(self.id, 1024, &mut log_len, v.as_mut_ptr().cast());
-                v.set_len(log_len.try_into().unwrap());
             }
-            Err(Errors::ShaderCompileError(String::from_utf8(v).unwrap()))
+            v.resize(log_len.try_into().unwrap(), 0);
+            Err(Errors::ShaderProgramLinkError(
+                String::from_utf8(v).unwrap(),
+            ))
         } else {
             Ok(())
+        }
+    }
+
+    pub fn detach_shader(&mut self, shader: Shader) {
+        unsafe {
+            gl::DetachShader(self.id, shader.id);
         }
     }
 

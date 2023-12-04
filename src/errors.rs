@@ -10,4 +10,7 @@ pub enum Errors {
 
     #[error("File not found")]
     FileNotFound(String),
+
+    #[error("Shader Program cannot be linked")]
+    ShaderProgramLinkError(String),
 }
