@@ -1,13 +1,10 @@
 use crate::errors::Errors;
-use crate::shaders::shader::ShaderType::FragmentShader;
-use crate::shaders::shader::{Shader, ShaderProgram};
 use glfw::{Context, GlfwReceiver};
 
 pub struct Window {
     glfw: glfw::Glfw,
     window_handle: glfw::PWindow,
     events: GlfwReceiver<(f64, glfw::WindowEvent)>,
-    shader_program: ShaderProgram,
 }
 
 impl Window {
@@ -28,28 +25,10 @@ impl Window {
         window_handle.make_current();
         gl::load_with(|symbol| window_handle.get_proc_address(symbol) as *const _);
 
-        let mut shader_program = ShaderProgram::new();
-        let fragment_shader =
-            Shader::new(FragmentShader, include_str!("../shaders/shader.frag")).unwrap();
-        let vertex_shader =
-            Shader::new(FragmentShader, include_str!("../shaders/shader.vert")).unwrap();
-
-        fragment_shader.compile().unwrap();
-        vertex_shader.compile().unwrap();
-
-        shader_program.attach_shader(&vertex_shader);
-        shader_program.attach_shader(&fragment_shader);
-
-        shader_program.link().unwrap();
-
-        shader_program.detach_shader(vertex_shader);
-        shader_program.detach_shader(fragment_shader);
-
         Ok(Self {
             glfw,
             window_handle,
             events,
-            shader_program,
         })
     }
 
@@ -73,7 +52,6 @@ impl Window {
     }
 
     pub fn update(&mut self) {
-        self.shader_program.use_program();
         self.process_events();
         self.glfw.poll_events();
         self.window_handle.swap_buffers();

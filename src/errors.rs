@@ -13,4 +13,10 @@ pub enum Errors {
 
     #[error("Shader Program cannot be linked")]
     ShaderProgramLinkError(String),
+
+    #[error("Cannot set a color and a texture at the same time")]
+    ColorAndTextureError,
+
+    #[error("Cannot set a color on a textured object")]
+    ColorOnTexturedObjectError,
 }

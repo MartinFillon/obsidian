@@ -1,4 +1,5 @@
 use crate::geometry::point::Point;
+use crate::graphics::colors::Colors;
 use crate::graphics::object::Object;
 
 pub struct Triangle {
@@ -10,7 +11,7 @@ pub struct Triangle {
 }
 
 impl Triangle {
-    pub fn new(position: Point, a: Point, b: Point, c: Point) -> Self {
+    pub fn new(position: Point, a: Point, b: Point, c: Point, color: Colors) -> Self {
         let object = Object::new(
             position,
             &[
@@ -25,7 +26,11 @@ impl Triangle {
                 c.z + position.z,
             ],
             &[0, 1, 2],
-        );
+            Some(color),
+            None,
+        )
+        .unwrap();
+
         Self {
             position,
             a,

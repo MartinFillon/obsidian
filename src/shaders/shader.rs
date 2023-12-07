@@ -1,4 +1,5 @@
 use crate::errors::Errors;
+use crate::logger;
 use gl::types::GLuint;
 
 #[derive(Clone, Copy)]
@@ -78,6 +79,7 @@ impl Shader {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct ShaderProgram {
     id: GLuint,
 }
@@ -124,6 +126,24 @@ impl ShaderProgram {
     pub fn use_program(&self) {
         unsafe {
             gl::UseProgram(self.id);
+        }
+    }
+
+    pub fn get_uniform_location(&self, name: &str) -> i32 {
+        let c_name = std::ffi::CString::new(name).unwrap();
+        let location = unsafe { gl::GetUniformLocation(self.id, c_name.as_ptr().cast()) };
+        location
+    }
+
+    pub fn set_uniform_4f(&self, location: i32, value: [f32; 4]) {
+        unsafe {
+            gl::Uniform4f(location, value[0], value[1], value[2], value[3]);
+        }
+    }
+
+    pub fn set_uniform_1i(&self, location: i32, value: i32) {
+        unsafe {
+            gl::Uniform1i(location, value);
         }
     }
 }
