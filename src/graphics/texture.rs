@@ -23,10 +23,6 @@ impl Texture2D {
         Self { id }
     }
 
-    pub fn get_id(&self) -> u32 {
-        self.id
-    }
-
     pub fn bind(&self) {
         unsafe {
             gl::BindTexture(gl::TEXTURE_2D, self.id);

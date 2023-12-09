@@ -1,5 +1,8 @@
 use crate::errors::Errors;
+use crate::geometry::point::Point;
+use crate::graphics::square::Square;
 use glfw::{Context, GlfwReceiver};
+use log::debug;
 
 pub struct Window {
     glfw: glfw::Glfw,

@@ -3,6 +3,8 @@
  * u32 values, x and y.
  */
 
+use std::ops::Add;
+
 #[derive(Debug, Clone, Copy)]
 pub struct Point {
     pub x: f32,
@@ -20,6 +22,18 @@ impl Point {
         let y = (self.y - other.y).powi(2);
         let z = (self.z - other.z).powi(2);
         (x + y + z).sqrt()
+    }
+
+    pub fn to_coords(&self, width: f32, height: f32) -> Point {
+        Point::new(self.x / width, self.y / height, self.z / 1.0)
+    }
+}
+
+impl Add for Point {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self::new(self.x + other.x, self.y + other.y, self.z + other.z)
     }
 }
 

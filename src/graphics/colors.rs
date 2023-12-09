@@ -42,6 +42,42 @@ impl Colors {
             alpha: 1.0,
         }
     }
+
+    pub fn white() -> Self {
+        Self {
+            red: 1.0,
+            green: 1.0,
+            blue: 1.0,
+            alpha: 1.0,
+        }
+    }
+
+    pub fn black() -> Self {
+        Self {
+            red: 0.0,
+            green: 0.0,
+            blue: 0.0,
+            alpha: 1.0,
+        }
+    }
+
+    pub fn yellow() -> Self {
+        Self {
+            red: 1.0,
+            green: 1.0,
+            blue: 0.0,
+            alpha: 1.0,
+        }
+    }
+
+    pub fn cyan() -> Self {
+        Self {
+            red: 0.0,
+            green: 1.0,
+            blue: 1.0,
+            alpha: 1.0,
+        }
+    }
 }
 
 impl From<&Colors> for [f32; 4] {

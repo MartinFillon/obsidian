@@ -1,5 +1,106 @@
+use crate::geometry::point::Point;
 use gl::types::{GLboolean, GLenum, GLfloat, GLsizei, GLsizeiptr};
 use std::ffi::c_void;
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Vertices {
+    position: [f32; 3],
+    texture: [f32; 2],
+}
+
+impl Vertices {
+    pub fn new(position: [f32; 3], texture: [f32; 2]) -> Self {
+        Self { position, texture }
+    }
+
+    pub fn empty() -> Self {
+        Self {
+            position: [0.0; 3],
+            texture: [0.0; 2],
+        }
+    }
+
+    pub fn set_position(&mut self, position: &[f32; 3]) {
+        self.position = position.clone();
+    }
+
+    pub fn set_texture(&mut self, texture: &[f32; 2]) {
+        self.texture = texture.clone();
+    }
+}
+
+impl From<Point> for Vertices {
+    fn from(point: Point) -> Self {
+        Self {
+            position: [point.x, point.y, point.z],
+            texture: [0.0, 0.0],
+        }
+    }
+}
+
+impl From<Vertices> for [f32; 5] {
+    fn from(vertices: Vertices) -> Self {
+        [
+            vertices.position[0],
+            vertices.position[1],
+            vertices.position[2],
+            vertices.texture[0],
+            vertices.texture[1],
+        ]
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Vertex {
+    vertex: Vec<Vertices>,
+}
+
+impl Vertex {
+    pub fn new(vertex: Vec<Vertices>) -> Self {
+        Self { vertex }
+    }
+
+    pub fn empty() -> Self {
+        Self { vertex: vec![] }
+    }
+
+    pub fn push(&mut self, vertex: Vertices) {
+        self.vertex.push(vertex);
+    }
+
+    pub fn get_mut(&mut self, index: usize) -> &mut Vertices {
+        self.vertex.get_mut(index).unwrap()
+    }
+
+    pub fn set(&mut self, index: usize, vertex: Vertices) {
+        self.vertex[index] = vertex.clone();
+    }
+
+    pub fn change_position(&mut self, position: Point) {
+        self.vertex = self
+            .vertex
+            .iter()
+            .map(|v| {
+                let mut coords = v.clone();
+                coords.position[0] += position.x;
+                coords.position[1] += position.y;
+                coords.position[2] += position.z;
+                coords
+            })
+            .collect();
+        ()
+    }
+}
+
+impl From<Vertex> for Box<[f32]> {
+    fn from(vertex: Vertex) -> Self {
+        let mut vertices: Vec<[f32; 5]> = vec![];
+        for v in vertex.vertex {
+            vertices.push(v.into());
+        }
+        vertices.concat().as_slice().into()
+    }
+}
 
 #[derive(Debug, Copy, Clone)]
 pub struct Vao {
@@ -54,7 +155,7 @@ impl Vbo {
         }
     }
 
-    pub fn buffer_data(&self, data: &[f32]) {
+    pub fn buffer_data(&self, data: Box<[f32]>) {
         unsafe {
             gl::BufferData(
                 gl::ARRAY_BUFFER,

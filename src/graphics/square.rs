@@ -1,7 +1,10 @@
 use crate::geometry::point::Point;
 use crate::graphics::colors::Colors;
 use crate::graphics::object::Object;
+use crate::graphics::vertex::Vertex;
+use log::debug;
 
+#[allow(dead_code)]
 pub struct Square {
     position: Point,
     a: Point,
@@ -21,35 +24,24 @@ impl Square {
         color: Option<Colors>,
         texture_path: Option<&str>,
     ) -> Self {
-        let object = Object::new(
-            position,
-            &[
-                a.x + position.x,
-                a.y + position.y,
-                a.z + position.z,
-                1.0,
-                1.0,
-                b.x + position.x,
-                b.y + position.y,
-                b.z + position.z,
-                1.0,
-                0.0,
-                c.x + position.x,
-                c.y + position.y,
-                c.z + position.z,
-                0.0,
-                0.0,
-                d.x + position.x,
-                d.y + position.y,
-                d.z + position.z,
-                0.0,
-                1.0,
-            ],
-            &[0, 1, 3, 1, 2, 3],
-            color,
-            texture_path,
-        )
-        .unwrap();
+        let mut vertex = Vertex::empty();
+
+        vertex.push(a.into());
+        vertex.push(b.into());
+        vertex.push(c.into());
+        vertex.push(d.into());
+
+        if texture_path.is_some() {
+            vertex.get_mut(0).set_texture(&[1.0, 1.0]);
+            vertex.get_mut(1).set_texture(&[1.0, 0.0]);
+            vertex.get_mut(2).set_texture(&[0.0, 0.0]);
+            vertex.get_mut(3).set_texture(&[0.0, 1.0]);
+        }
+
+        debug!("Vertex: {:?}", vertex);
+
+        let object =
+            Object::new(position, vertex, &[0, 1, 3, 1, 2, 3], color, texture_path).unwrap();
 
         Self {
             position,
@@ -65,19 +57,12 @@ impl Square {
         self.object.display();
     }
 
+    pub fn set_position(&mut self, position: Point) {
+        self.position = position;
+        self.object.set_position(position);
+    }
+
     pub fn get_position(&self) -> Point {
         self.position
-    }
-
-    pub fn get_a(&self) -> Point {
-        self.a
-    }
-
-    pub fn get_b(&self) -> Point {
-        self.b
-    }
-
-    pub fn get_c(&self) -> Point {
-        self.c
     }
 }

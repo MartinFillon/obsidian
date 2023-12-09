@@ -1,5 +1,4 @@
 use crate::errors::Errors;
-use crate::logger;
 use gl::types::GLuint;
 
 #[derive(Clone, Copy)]
