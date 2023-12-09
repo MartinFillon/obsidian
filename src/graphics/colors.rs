@@ -1,9 +1,9 @@
 #[derive(Debug, Clone, Copy)]
 pub struct Colors {
-    red: f32,
-    green: f32,
-    blue: f32,
-    alpha: f32,
+    pub red: f32,
+    pub green: f32,
+    pub blue: f32,
+    pub alpha: f32,
 }
 
 impl Colors {

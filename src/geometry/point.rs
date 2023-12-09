@@ -24,8 +24,14 @@ impl Point {
         (x + y + z).sqrt()
     }
 
-    pub fn to_coords(&self, width: f32, height: f32) -> Point {
-        Point::new(self.x / width, self.y / height, self.z / 1.0)
+    pub fn to_coords(&self) -> Point {
+        let video_mode = glfw::Monitor::from_primary().get_video_mode().unwrap();
+
+        Point::new(
+            self.x / video_mode.width as f32,
+            self.y / video_mode.height as f32,
+            self.z / 1.0,
+        )
     }
 }
 

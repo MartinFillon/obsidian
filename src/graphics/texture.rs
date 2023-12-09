@@ -1,4 +1,3 @@
-use crate::logger;
 use image::io::Reader as ImageReader;
 use std::ffi::c_void;
 
@@ -17,8 +16,6 @@ impl Texture2D {
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::NEAREST as i32);
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
         }
-
-        logger::debug!("Texture2D created with id: {}", id);
 
         Self { id }
     }

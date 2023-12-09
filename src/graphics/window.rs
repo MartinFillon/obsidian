@@ -1,27 +1,32 @@
 use crate::errors::Errors;
-use crate::geometry::point::Point;
-use crate::graphics::square::Square;
-use glfw::{Context, GlfwReceiver};
-use log::debug;
+use crate::graphics::colors::Colors;
+use glfw::{Context, GlfwReceiver, WindowEvent};
 
 pub struct Window {
     glfw: glfw::Glfw,
     window_handle: glfw::PWindow,
-    events: GlfwReceiver<(f64, glfw::WindowEvent)>,
+    events: GlfwReceiver<(f64, WindowEvent)>,
 }
 
 impl Window {
-    pub fn new(width: u32, height: u32, title: &str) -> Result<Self, Errors> {
+    pub fn new(width: u32, height: u32, title: &str, fullscreen: bool) -> Result<Self, Errors> {
         let mut glfw = match glfw::init(glfw::fail_on_errors) {
             Ok(glfw) => glfw,
             Err(_) => return Err(Errors::WindowInitError),
         };
 
-        let (mut window_handle, events) =
-            match glfw.create_window(width, height, title, glfw::WindowMode::Windowed) {
-                Some((window_handle, events)) => (window_handle, events),
-                None => return Err(Errors::WindowInitError),
-            };
+        let monitor = glfw::Monitor::from_primary();
+
+        let mode = if fullscreen {
+            glfw::WindowMode::FullScreen(&monitor)
+        } else {
+            glfw::WindowMode::Windowed
+        };
+
+        let (mut window_handle, events) = match glfw.create_window(width, height, title, mode) {
+            Some((window_handle, events)) => (window_handle, events),
+            None => return Err(Errors::WindowInitError),
+        };
 
         window_handle.set_framebuffer_size_polling(true);
         window_handle.set_key_polling(true);
@@ -39,24 +44,28 @@ impl Window {
         self.window_handle.should_close()
     }
 
-    fn process_events(&mut self) {
-        self.glfw.poll_events();
-        for (_, event) in glfw::flush_messages(&self.events) {
-            match event {
-                glfw::WindowEvent::FramebufferSize(width, height) => unsafe {
-                    gl::Viewport(0, 0, width, height);
-                },
-                glfw::WindowEvent::Key(glfw::Key::Escape, _, glfw::Action::Press, _) => {
-                    self.window_handle.set_should_close(true)
-                }
-                _ => {}
-            }
+    pub fn set_should_close(&mut self, value: bool) {
+        self.window_handle.set_should_close(value);
+    }
+
+    pub fn resize(&mut self, width: i32, height: i32) {
+        unsafe {
+            gl::Viewport(0, 0, width, height);
         }
     }
 
-    pub fn update(&mut self) {
-        self.process_events();
-        self.glfw.poll_events();
+    pub fn update(&mut self) -> Vec<WindowEvent> {
         self.window_handle.swap_buffers();
+        self.glfw.poll_events();
+        glfw::flush_messages(&self.events)
+            .map(|(_, event)| event)
+            .collect()
+    }
+
+    pub fn clear(&mut self, color: Colors) {
+        unsafe {
+            gl::ClearColor(color.red, color.green, color.blue, color.alpha);
+            gl::Clear(gl::COLOR_BUFFER_BIT);
+        }
     }
 }

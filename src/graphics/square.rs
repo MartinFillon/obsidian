@@ -26,10 +26,15 @@ impl Square {
     ) -> Self {
         let mut vertex = Vertex::empty();
 
-        vertex.push(a.into());
-        vertex.push(b.into());
-        vertex.push(c.into());
-        vertex.push(d.into());
+        let coords_a = a.to_coords();
+        let coords_b = b.to_coords();
+        let coords_c = c.to_coords();
+        let coords_d = d.to_coords();
+
+        vertex.push(coords_a.into());
+        vertex.push(coords_b.into());
+        vertex.push(coords_c.into());
+        vertex.push(coords_d.into());
 
         if texture_path.is_some() {
             vertex.get_mut(0).set_texture(&[1.0, 1.0]);
@@ -38,17 +43,15 @@ impl Square {
             vertex.get_mut(3).set_texture(&[0.0, 1.0]);
         }
 
-        debug!("Vertex: {:?}", vertex);
-
         let object =
             Object::new(position, vertex, &[0, 1, 3, 1, 2, 3], color, texture_path).unwrap();
 
         Self {
             position,
-            a,
-            b,
-            c,
-            d,
+            a: coords_a,
+            b: coords_b,
+            c: coords_c,
+            d: coords_d,
             object,
         }
     }
